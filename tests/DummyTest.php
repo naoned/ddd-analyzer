@@ -1,6 +1,6 @@
 <?php
 
-namespace __ONYX_Namespace;
+namespace Niktux\DDD\Analyzer;
 
 use PHPUnit\Framework\TestCase;
 

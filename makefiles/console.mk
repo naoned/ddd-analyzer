@@ -2,11 +2,14 @@
 # Onyx Console
 #------------------------------------------------------------------------------
 
-CONSOLE_IMAGE_NAME=onyx/console
-CONTAINER_SOURCE_PATH=/usr/src/onyx
+CONSOLE_IMAGE_NAME=ddd/analyzer
+CONTAINER_SOURCE_PATH=/usr/src/ddd
+ANALYZED_SOURCE_PATH=${HOST_SOURCE_PATH}/../naoned/kenao
+CONTAINER_VAR_SRC=/var/kenao
 
 console = docker run -t -i --rm \
                 -v ${HOST_SOURCE_PATH}:${CONTAINER_SOURCE_PATH} \
+                -v ${ANALYZED_SOURCE_PATH}:${CONTAINER_VAR_SRC} \
                 -u ${USER_ID}:${GROUP_ID} \
                 -w ${CONTAINER_SOURCE_PATH} \
                 ${CONSOLE_IMAGE_NAME} \

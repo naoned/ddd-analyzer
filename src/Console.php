@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace __ONYX_Namespace;
+namespace Niktux\DDD\Analyzer;
 
 use Puzzle\Configuration;
 use Pimple\Container;
@@ -22,7 +22,7 @@ class Console
         $this->app = new \Onyx\Console\Application($container);
 
         $this->app->add(new RouteLister(new Silex($container)));
-        $this->app->add(new Console\HelloWorld());
+        $this->app->add(new Console\Run($container));
     }
 
     public function run(): void
