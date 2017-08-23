@@ -10,6 +10,8 @@ use PhpParser\Node\Stmt\Interface_;
 use PhpParser\Node\Stmt\Trait_;
 use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\ClassMethod;
+use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
+use Niktux\DDD\Analyzer\Domain\ValueObjects\ObjectType;
 
 abstract class ContextualVisitor extends AbstractVisitor
 {
@@ -39,19 +41,19 @@ abstract class ContextualVisitor extends AbstractVisitor
     {
         if($node instanceof Namespace_)
         {
-            $this->currentNamespace = $node->name;
+            $this->currentNamespace = new FullyQualifiedName($node->name->toString());
         }
         elseif($node instanceof Class_)
         {
-            $this->currentObjectType = new ObjectType($this->currentNamespace, $node->name);
+            $this->currentObjectType = new ObjectDefinition($this->currentNamespace, $node->name);
         }
         elseif($node instanceof Interface_)
         {
-            $this->currentObjectType = new ObjectType($this->currentNamespace, $node->name, ObjectType::TYPE_INTERFACE);
+            $this->currentObjectType = new ObjectDefinition($this->currentNamespace, $node->name, ObjectType::interface());
         }
         elseif($node instanceof Trait_)
         {
-            $this->currentObjectType = new ObjectType($this->currentNamespace, $node->name, ObjectType::TYPE_TRAIT);
+            $this->currentObjectType = new ObjectDefinition($this->currentNamespace, $node->name, ObjectType::trait());
         }
         elseif($node instanceof ClassMethod)
         {

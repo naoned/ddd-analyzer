@@ -8,107 +8,79 @@ use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_;
 use Niktux\DDD\Analyzer\Domain\ContextualVisitor;
 use PhpParser\Node\Name;
-use PhpParser\Node\Stmt\Namespace_;
 use Niktux\DDD\Analyzer\Domain\Defects\BoundedContextCouplage;
 use Niktux\DDD\Analyzer\Domain\Defects\LayerViolationCall;
+use Niktux\DDD\Analyzer\Domain\NamespaceInterpreter;
+use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
+use Niktux\DDD\Analyzer\Domain\ValueObjects\InterpretedFQN;
 
 class BoundedContextDependency extends ContextualVisitor
 {
     private
-        $namespace = null;
+        $interpreter;
+
+    public function __construct(NamespaceInterpreter $interpreter)
+    {
+        parent::__construct();
+
+        $this->interpreter = $interpreter;
+    }
 
     public function enter(Node $node)
     {
-        if($node instanceof Namespace_)
-        {
-            $this->namespace = $this->analyze($node->name); // FIXME $node->name can be null
-        }
-
         if($node instanceof Use_)
         {
-            if($this->namespace !== null)
+            if($this->interpreter->canTranslate($this->currentNamespace) === false)
             {
-                foreach($node->uses as $use)
-                {
-                    $dep = $this->analyze($use->name);
+                return;
+            }
 
-                    if($dep !== null)
-                    {
-                        $this->checkRule($node, $use->name, $dep);
-                    }
+            foreach($node->uses as $use)
+            {
+                $dependencyFqn = $this->analyze($use->name);
+
+                if($dependencyFqn !== null)
+                {
+                    $this->checkRule($node, $dependencyFqn);
                 }
             }
         }
     }
 
-    private function analyze(Name $node): ?array
+    private function analyze(Name $node): ?InterpretedFQN
     {
-        $parts = $node->parts;
+        $fqn = new FullyQualifiedName($node->toString());
 
-        if(count($parts) > 3)
+        if($this->interpreter->canTranslate($fqn))
         {
-            if($parts[0] === 'Naoned' && $parts[1] === 'Kenao')
+            $fqn = $this->interpreter->translate($fqn);
+            $bc = $fqn->boundedContext();
+
+            $notBC = ['Console', 'Controllers', 'Domain', 'Persistence', 'Projection', 'Services', 'Workers'];
+
+            if(! in_array($bc->value(), $notBC))
             {
-                return $this->analyzeOwn($node, array_slice($parts, 2));
+                return $fqn;
             }
         }
 
         return null;
     }
 
-    private function analyzeOwn(Name $node, array $subparts): ?array
+    private function checkRule(Use_ $node, InterpretedFQN $dependency)
     {
-        $bc = $subparts[0];
+        $namespace = $this->interpreter->translate($this->currentNamespace);
 
-        $notBC = ['Console', 'Controllers', 'Domain', 'Persistence', 'Projection', 'Services', 'Workers'];
-
-        if(in_array($bc, $notBC))
+        if(! $namespace->boundedContext()->equals($dependency->boundedContext()))
         {
-            return null;
+            $this->dispatch(new BoundedContextCouplage($node, $namespace->boundedContext(), $dependency));
         }
 
-        $layer = $subparts[1];
-        $sub = isset($subparts[2]) ? $subparts[2] : null;
-
-        return [$bc, $layer, $sub];
-    }
-
-    private function checkRule(Use_ $node, Name $dependency, array $dep)
-    {
-        list($nsBc, $nsLayer, $nsSub) = $this->namespace;
-        list($depBc, $depLayer, $depSub) = $dep;
-
-        if($nsBc !== $depBc)
+        if($namespace->layer() !== $dependency->layer())
         {
-            $this->dispatch(new BoundedContextCouplage($node, $dependency, $nsBc, $depBc));
-        }
-
-        if($nsLayer !== $depLayer)
-        {
-            /*
-            $allowedLayerCalls = [
-                'Domain' => ['Domain'],
-                'Application' => ['Domain', 'Application'],
-                'Infrastructure' => ['Domain', 'Application', 'Infrastructure'],
-            ]; //*/
-
-            $layerDepth = [
-                'Domain' => 0,
-                'Application' => 1,
-                'Infrastructure' => 2,
-            ];
-
-            $layers = array_keys($layerDepth);
-
-            if(in_array($nsLayer, $layers) && in_array($depLayer, $layers))
+            if($namespace->layer()->isDeeperThan($dependency->layer()))
             {
-                $nsDepth = $layerDepth[$nsLayer];
-                $depDepth = $layerDepth[$depLayer];
-
-                if($depDepth > $nsDepth)
-                {
-                    $this->dispatch(new LayerViolationCall($node, $dependency, $nsBc, $nsLayer, $depLayer));
-                }
+                $this->dispatch(new LayerViolationCall($node, $namespace->layer(), $dependency));
             }
         }
     }

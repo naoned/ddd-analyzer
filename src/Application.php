@@ -13,6 +13,7 @@ use Niktux\DDD\Analyzer\Domain\ValueObjects\TraverseMode;
 use Niktux\DDD\Analyzer\Domain\Visitors\ClassAliasingDetection;
 use Niktux\DDD\Analyzer\Domain\Visitors\AnonymousClassDetection;
 use Niktux\DDD\Analyzer\Domain\Visitors\BoundedContextDependency;
+use Niktux\DDD\Analyzer\Domain\NamespaceInterpreter;
 
 class Application extends \Onyx\Application
 {
@@ -45,7 +46,7 @@ class Application extends \Onyx\Application
 
             $analyzer->addVisitor(TraverseMode::analyze(), new ClassAliasingDetection(['DTO']));
             $analyzer->addVisitor(TraverseMode::analyze(), new AnonymousClassDetection());
-            $analyzer->addVisitor(TraverseMode::analyze(), new BoundedContextDependency());
+            $analyzer->addVisitor(TraverseMode::analyze(), new BoundedContextDependency(new NamespaceInterpreter(2)));
 
             return $analyzer;
         };
