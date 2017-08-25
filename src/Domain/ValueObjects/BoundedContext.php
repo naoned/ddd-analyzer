@@ -31,4 +31,9 @@ final class BoundedContext implements ValueObject, ConvertibleToString
     {
         return $this->context;
     }
+
+    public static function unknown(): self
+    {
+        return new self('unknown');
+    }
 }

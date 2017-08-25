@@ -14,6 +14,7 @@ use Niktux\DDD\Analyzer\Domain\Visitors\ClassAliasingDetection;
 use Niktux\DDD\Analyzer\Domain\Visitors\AnonymousClassDetection;
 use Niktux\DDD\Analyzer\Domain\Visitors\BoundedContextDependency;
 use Niktux\DDD\Analyzer\Domain\NamespaceInterpreter;
+use Niktux\DDD\Analyzer\Domain\DefectSorter;
 
 class Application extends \Onyx\Application
 {
@@ -41,12 +42,20 @@ class Application extends \Onyx\Application
             return new Dispatchers\EventDispatcher($c['dispatcher']);
         };
 
+        $this['name.interpreter'] = function($c) {
+            return new NamespaceInterpreter(2);
+        };
+
+        $this['defect.sorter'] = function($c) {
+            return new DefectSorter($c['name.interpreter']);
+        };
+
         $this['analyzer'] = function($c) {
             $analyzer = new Analyzer($c['event.dispatcher'], $c['filesystem']);
 
             $analyzer->addVisitor(TraverseMode::analyze(), new ClassAliasingDetection(['DTO']));
             $analyzer->addVisitor(TraverseMode::analyze(), new AnonymousClassDetection());
-            $analyzer->addVisitor(TraverseMode::analyze(), new BoundedContextDependency(new NamespaceInterpreter(2)));
+            $analyzer->addVisitor(TraverseMode::analyze(), new BoundedContextDependency($c['name.interpreter']));
 
             return $analyzer;
         };
@@ -68,6 +77,14 @@ class Application extends \Onyx\Application
     {
         $this['subscriber.console'] = function($c) {
             return new EventSubscribers\Console();
+        };
+
+        $this['reporter.html'] = function($c) {
+            return new Reporters\HTMLReporter($c['twig']);
+        };
+
+        $this['subscriber.html'] = function($c) {
+            return new EventSubscribers\HTML($c['reporter.html'], $c['defect.sorter']);
         };
     }
 

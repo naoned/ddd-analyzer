@@ -8,6 +8,11 @@ use Niktux\DDD\Analyzer\Defect;
 
 final class AnonymousClass extends Defect
 {
+    public function getName(): string
+    {
+        return "Anonymous class";
+    }
+
     public function getMessage(): string
     {
         $extends = '';

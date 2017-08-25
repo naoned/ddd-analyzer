@@ -9,6 +9,7 @@ use Niktux\DDD\Analyzer\Domain\Analyzer;
 use Pimple\Container;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use Symfony\Component\Console\Input\InputOption;
 
 class Run extends Command
 {
@@ -26,7 +27,8 @@ class Run extends Command
     {
         $this->setName('analyze')
             ->setDescription('Run anlysis')
-            ->addArgument('src', InputArgument::REQUIRED, 'sources to analyze');
+            ->addArgument('src', InputArgument::REQUIRED, 'sources to analyze')
+            ->addOption('htmlReport', null, InputOption::VALUE_REQUIRED, 'HTML report filename');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -42,7 +44,9 @@ class Run extends Command
     private function configureOutputs(InputInterface $input, OutputInterface $output)
     {
         $dispatcher = $this->container['dispatcher'];
+
         $this->enableConsoleOutput($dispatcher, $output);
+        $this->enableHtmlReport($dispatcher, $input->getOption('htmlReport'));
     }
 
     private function enableConsoleOutput(EventDispatcherInterface $dispatcher, OutputInterface $output)
@@ -50,5 +54,16 @@ class Run extends Command
         $console = $this->container['subscriber.console'];
         $console->setOutput($output);
         $dispatcher->addSubscriber($console);
+    }
+
+    private function enableHtmlReport(EventDispatcherInterface $dispatcher, $htmlReportFilename)
+    {
+        if($htmlReportFilename !== null)
+        {
+            $html = $this->container['subscriber.html'];
+            $html->setReportFilename($htmlReportFilename);
+
+            $dispatcher->addSubscriber($html);
+        }
     }
 }

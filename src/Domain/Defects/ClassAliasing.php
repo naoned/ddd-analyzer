@@ -8,6 +8,11 @@ use Niktux\DDD\Analyzer\Defect;
 
 class ClassAliasing extends Defect
 {
+    public function getName(): string
+    {
+        return "Class alias";
+    }
+
     public function getMessage(): string
     {
         return sprintf(

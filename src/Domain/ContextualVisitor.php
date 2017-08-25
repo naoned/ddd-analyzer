@@ -12,6 +12,7 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\ClassMethod;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\ObjectType;
+use Niktux\DDD\Analyzer\Defect;
 
 abstract class ContextualVisitor extends AbstractVisitor
 {
@@ -86,6 +87,21 @@ abstract class ContextualVisitor extends AbstractVisitor
     final public function afterTraverse(array $nodes)
     {
         $this->after($nodes);
+    }
+
+    protected function dispatch(Defect $event): void
+    {
+        if($this->currentNamespace instanceof FullyQualifiedName)
+        {
+            $event->setNamespace($this->currentNamespace);
+        }
+
+        if($this->currentObjectType instanceof ObjectDefinition)
+        {
+            $event->setObject($this->currentObjectType);
+        }
+
+        parent::dispatch($event);
     }
 
     protected function before(array $nodes)

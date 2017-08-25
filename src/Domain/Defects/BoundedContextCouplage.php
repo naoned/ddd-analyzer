@@ -23,6 +23,11 @@ final class BoundedContextCouplage extends Defect
         $this->bcFrom = $bcFrom;
     }
 
+    public function getName(): string
+    {
+        return "Bounded contexts couplage";
+    }
+
     public function getMessage(): string
     {
         return sprintf(

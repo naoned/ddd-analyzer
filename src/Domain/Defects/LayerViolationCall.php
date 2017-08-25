@@ -23,6 +23,11 @@ final class LayerViolationCall extends Defect
         $this->dependency = $dependency;
     }
 
+    public function getName(): string
+    {
+        return "Layer violation";
+    }
+
     public function getMessage(): string
     {
         return sprintf(

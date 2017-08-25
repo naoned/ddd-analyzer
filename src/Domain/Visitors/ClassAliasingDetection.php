@@ -6,7 +6,6 @@ namespace Niktux\DDD\Analyzer\Domain\Visitors;
 
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_;
-use PhpParser\Node\Stmt\UseUse;
 use Niktux\DDD\Analyzer\Domain\ContextualVisitor;
 use Niktux\DDD\Analyzer\Domain\Defects\ClassAliasing;
 
@@ -35,20 +34,18 @@ class ClassAliasingDetection extends ContextualVisitor
 
                     if($alias !== $name)
                     {
-                        $this->aliasFound($use);
+                        if(in_array($use->alias, $this->aliasWhitelist))
+                        {
+                            return;
+                        }
+
+                        $defect = new ClassAliasing($use);
+                        $defect->setContext($node);
+
+                        $this->dispatch($defect);
                     }
                 }
             }
         }
-    }
-
-    private function aliasFound(UseUse $node): void
-    {
-        if(in_array($node->alias, $this->aliasWhitelist))
-        {
-            return;
-        }
-
-        $this->dispatch(new ClassAliasing($node));
     }
 }
