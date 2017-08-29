@@ -2,7 +2,7 @@ version: '3'
 services:
     frontend:
         build: images/apache
-        image: onyx/frontend
+        image: ddd-analyzer/frontend
         volumes:
             - ..:/var/www/onyx
             - ../system/bash-history/.frontend:/root/.bash_history

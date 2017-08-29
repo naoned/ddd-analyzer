@@ -1,0 +1,9 @@
+BoundedContextDependency:
+  couplage:
+    whitelist:
+      - Core
+AnonymousClassDetection:
+  enabled: true
+ClassAliasingDetection:
+  whitelist:
+    - DTO

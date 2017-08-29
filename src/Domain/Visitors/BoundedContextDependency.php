@@ -13,17 +13,25 @@ use Niktux\DDD\Analyzer\Domain\Defects\LayerViolationCall;
 use Niktux\DDD\Analyzer\Domain\NamespaceInterpreter;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\InterpretedFQN;
+use Puzzle\Configuration;
 
 class BoundedContextDependency extends ContextualVisitor
 {
     private
-        $interpreter;
+        $interpreter,
+        $bcWhitelist;
 
-    public function __construct(NamespaceInterpreter $interpreter)
+    public function __construct(NamespaceInterpreter $interpreter, Configuration $configuration)
     {
         parent::__construct();
 
         $this->interpreter = $interpreter;
+        $this->bcWhitelist = $configuration->read('couplage/whitelist', []);
+    }
+
+    public function getId(): string
+    {
+        return "BoundedContextDependency";
     }
 
     public function enter(Node $node)
@@ -70,10 +78,14 @@ class BoundedContextDependency extends ContextualVisitor
     private function checkRule(Use_ $node, InterpretedFQN $dependency)
     {
         $namespace = $this->interpreter->translate($this->currentNamespace);
+        $targetBc = $dependency->boundedContext();
 
-        if(! $namespace->boundedContext()->equals($dependency->boundedContext()))
+        if(! $namespace->boundedContext()->equals($targetBc))
         {
-            $this->dispatch(new BoundedContextCouplage($node, $namespace->boundedContext(), $dependency));
+            if(! in_array($targetBc->value(), $this->bcWhitelist))
+            {
+                $this->dispatch(new BoundedContextCouplage($node, $namespace->boundedContext(), $dependency));
+            }
         }
 
         if($namespace->layer() !== $dependency->layer())

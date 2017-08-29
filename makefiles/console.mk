@@ -4,10 +4,11 @@
 
 CONSOLE_IMAGE_NAME=ddd/analyzer
 CONTAINER_SOURCE_PATH=/usr/src/ddd
-ANALYZED_SOURCE_PATH=${HOST_SOURCE_PATH}/../naoned/kenao
-CONTAINER_VAR_SRC=/var/kenao
+ANALYZED_SOURCE_PATH=${HOST_SOURCE_PATH}/${ANALYZED_RELATIVE_SOURCE_PATH}
+CONTAINER_VAR_SRC=/var/src
 
 console = docker run -t -i --rm \
+                --name "ddd-analyzer-console" \
                 -v ${HOST_SOURCE_PATH}:${CONTAINER_SOURCE_PATH} \
                 -v ${ANALYZED_SOURCE_PATH}:${CONTAINER_VAR_SRC} \
                 -u ${USER_ID}:${GROUP_ID} \
@@ -29,6 +30,9 @@ create-console-image: docker/images/console/Dockerfile
 
 console: create-console-image ## Run console command
 	$(call console, ${CLI_ARGS})
+
+console-analyze: create-console-image ## Run console command
+	$(call console, -vvv analyze --htmlReport report.html ${CONTAINER_VAR_SRC}/src)
 
 #------------------------------------------------------------------------------
 

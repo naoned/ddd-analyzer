@@ -15,6 +15,7 @@ use Niktux\DDD\Analyzer\Domain\Visitors\AnonymousClassDetection;
 use Niktux\DDD\Analyzer\Domain\Visitors\BoundedContextDependency;
 use Niktux\DDD\Analyzer\Domain\NamespaceInterpreter;
 use Niktux\DDD\Analyzer\Domain\DefectSorter;
+use Puzzle\PrefixedConfiguration;
 
 class Application extends \Onyx\Application
 {
@@ -51,13 +52,46 @@ class Application extends \Onyx\Application
         };
 
         $this['analyzer'] = function($c) {
+            $config = $c['configuration'];
             $analyzer = new Analyzer($c['event.dispatcher'], $c['filesystem']);
 
-            $analyzer->addVisitor(TraverseMode::analyze(), new ClassAliasingDetection(['DTO']));
-            $analyzer->addVisitor(TraverseMode::analyze(), new AnonymousClassDetection());
-            $analyzer->addVisitor(TraverseMode::analyze(), new BoundedContextDependency($c['name.interpreter']));
+            $visitors = [
+                'BoundedContextDependency',
+                'AnonymousClassDetection',
+                'ClassAliasingDetection',
+            ];
+
+            foreach($visitors as $visitor)
+            {
+                if($config->read("analyzer/$visitor/enabled", true))
+                {
+                    $analyzer->addVisitor(TraverseMode::analyze(), $c["visitors.$visitor"]);
+                }
+            }
 
             return $analyzer;
+        };
+
+        $this->initializeVisitors();
+    }
+
+    private function initializeVisitors()
+    {
+        $this['visitors.BoundedContextDependency'] = function($c) {
+            return new BoundedContextDependency(
+                $c['name.interpreter'],
+                new PrefixedConfiguration($c['configuration'], "analyzer/BoundedContextDependency")
+            );
+        };
+
+        $this['visitors.AnonymousClassDetection'] = function($c) {
+            return new AnonymousClassDetection();
+        };
+
+        $this['visitors.ClassAliasingDetection'] = function($c) {
+            return new ClassAliasingDetection(
+                new PrefixedConfiguration($c['configuration'], "analyzer/ClassAliasingDetection")
+            );
         };
     }
 

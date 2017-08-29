@@ -1,4 +1,4 @@
-name: onyx-console
+name: ddd-anamyzer-console
 php:
     version: 7.1
 extensions:

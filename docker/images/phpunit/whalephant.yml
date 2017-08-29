@@ -1,4 +1,4 @@
-name: onyx-skeleton
+name: ddd-analyzer-phpunit
 php:
     version: 7.1
 extensions:
