@@ -55,6 +55,11 @@ class Application extends \Onyx\Application
             $config = $c['configuration'];
             $analyzer = new Analyzer($c['event.dispatcher'], $c['filesystem']);
 
+            if($config->read('analyzer/skipTests', false))
+            {
+                $analyzer->skipTests();
+            }
+
             $visitors = [
                 'BoundedContextDependency',
                 'AnonymousClassDetection',

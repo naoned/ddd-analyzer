@@ -1,4 +1,4 @@
-name: ddd-anamyzer-console
+name: ddd-analyzer-console
 php:
     version: 7.1
 extensions:
@@ -7,3 +7,4 @@ ini:
     - "error_reporting = E_ALL;"
     - "xdebug.var_display_max_depth = 5;"
     - "xdebug.max_nesting_level = 3000;"
+    - "memory_limit=1G;"

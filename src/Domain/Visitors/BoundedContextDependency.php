@@ -38,7 +38,7 @@ class BoundedContextDependency extends ContextualVisitor
     {
         if($node instanceof Use_)
         {
-            if($this->interpreter->canTranslate($this->currentNamespace) === false)
+            if($this->currentNamespace === null || $this->interpreter->canTranslate($this->currentNamespace) === false)
             {
                 return;
             }

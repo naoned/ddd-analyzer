@@ -17,6 +17,7 @@ use Niktux\DDD\Analyzer\Events\ChangeFile;
 class Analyzer implements VisitableAnalyzer
 {
     private
+        $skipTests,
         $visitors,
         $nodeTraversers,
         $dispatcher,
@@ -24,6 +25,7 @@ class Analyzer implements VisitableAnalyzer
 
     public function __construct(Dispatcher $dispatcher, Filesystem $fs)
     {
+        $this->skipTests = false;
         $this->visitors = [];
 
         $this->nodeTraversers = array(
@@ -33,6 +35,11 @@ class Analyzer implements VisitableAnalyzer
 
         $this->dispatcher = $dispatcher;
         $this->fs = $fs;
+    }
+
+    public function skipTests(): void
+    {
+        $this->skipTests = true;
     }
 
     public function addVisitor(TraverseMode $mode, Visitor $visitor): self
@@ -72,6 +79,13 @@ class Analyzer implements VisitableAnalyzer
             '~.php$~'
         );
 
+        if($this->skipTests === true)
+        {
+            $iterator = new \CallbackFilterIterator($iterator, function($file) {
+                return preg_match('~/tests/~', $file) === 0;
+            });
+        }
+
         foreach($iterator as $key)
         {
             if($adapter->isDirectory($key) === false)
@@ -85,9 +99,21 @@ class Analyzer implements VisitableAnalyzer
 
     private function parseFile(File $file): ?iterable
     {
-        $parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
+        try
+        {
+            $parser = (new ParserFactory())->create(ParserFactory::ONLY_PHP7);
 
-        return $parser->parse($file->getContent());
+            return $parser->parse($file->getContent());
+        }
+        catch(\Exception $e)
+        {
+            throw new \RuntimeException(sprint(
+                "Exception %s while parsing file %s : %s",
+                get_class($e),
+                $file->getName(),
+                $e->getMessage()
+            ));
+        }
     }
 
     private function preAnalyze(array $nodes): void

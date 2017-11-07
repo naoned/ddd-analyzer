@@ -46,6 +46,7 @@ abstract class ContextualVisitor extends AbstractVisitor
         }
         elseif($node instanceof Class_)
         {
+            $this->currentNamespace = $this->currentNamespace ?? new FullyQualifiedName('');
             $this->currentObjectType = new ObjectDefinition($this->currentNamespace, $node->name);
         }
         elseif($node instanceof Interface_)
