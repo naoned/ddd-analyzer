@@ -14,6 +14,7 @@ use Niktux\DDD\Analyzer\Events\ChangeFile;
 class Console implements EventSubscriberInterface
 {
     private
+        $messages,
         $counter,
         $currentFile,
         $output;
@@ -29,6 +30,7 @@ class Console implements EventSubscriberInterface
 
     public function __construct()
     {
+        $this->messages = [];
         $this->output = new NullOutput();
         $this->currentFile = null;
         $this->counter = 0;
@@ -50,12 +52,12 @@ class Console implements EventSubscriberInterface
 
     public function onDefect(Defect $event)
     {
-        $this->output->writeln(sprintf(
+        $this->messages[] = sprintf(
             "<fg=white;options=bold>%s @ l%d</fg=white;options=bold> : %s",
             $this->currentFile,
             $event->getLine(),
             $this->formatMessage($event->getMessage())
-        ));
+        );
 
         $this->counter++;
     }
@@ -71,6 +73,8 @@ class Console implements EventSubscriberInterface
 
     public function postMortemReport(TraverseEnd $event)
     {
+        $this->output->writeln($this->messages);
+
         $this->output->writeln(sprintf(
             '<comment>%d defect%s found</comment>',
             $this->counter,
