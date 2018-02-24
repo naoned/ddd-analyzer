@@ -21,4 +21,13 @@ class ClassAliasing extends Defect
             $this->node->alias
         );
     }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'type' => 'class_aliasing',
+            'class' => $this->node->name->getLast(),
+            'alias' => $this->node->alias,
+        ];
+    }
 }

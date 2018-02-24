@@ -12,21 +12,18 @@ export GROUP_ID
 
 #------------------------------------------------------------------------------
 
--include vendor/onyx/core/wizards.mk
 include makefiles/composer.mk
 -include makefiles/console.mk
-include makefiles/docker.mk
 include makefiles/karma.mk
 include makefiles/phpunit.mk
 include makefiles/qa.mk
-include makefiles/webpack.mk
 include makefiles/whalephant.mk
 
 #------------------------------------------------------------------------------
 
 .DEFAULT_GOAL := help
 
-init: var install-dependencies config webpack gitignore .env ## Initialize project
+init: var install-dependencies config gitignore .env ## Initialize project
 
 .env:
 	cp .env.example .env
@@ -34,7 +31,7 @@ init: var install-dependencies config webpack gitignore .env ## Initialize proje
 var:
 	mkdir -m a+w var
 
-install-dependencies: composer-install npm-install
+install-dependencies: composer-install
 
 gitignore:
 	sed '/^composer.lock$$/d' -i .gitignore
@@ -48,7 +45,7 @@ help:
 
 #------------------------------------------------------------------------------
 
-clean: clean-composer clean-docker clean-karma clean-phpunit clean-qa clean-webpack clean-whalephant
+clean: clean-composer clean-karma clean-phpunit clean-qa clean-whalephant
 	-rm -rf var
 
 #------------------------------------------------------------------------------

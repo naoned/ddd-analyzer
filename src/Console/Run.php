@@ -28,7 +28,9 @@ class Run extends Command
         $this->setName('analyze')
             ->setDescription('Run anlysis')
             ->addArgument('src', InputArgument::REQUIRED, 'sources to analyze')
-            ->addOption('htmlReport', null, InputOption::VALUE_REQUIRED, 'HTML report filename');
+            ->addOption('no-output', null, InputOption::VALUE_NONE, 'Disable stdout report')
+            ->addOption('htmlReport', null, InputOption::VALUE_REQUIRED, 'HTML report filename')
+            ->addOption('jsonReport', null, InputOption::VALUE_REQUIRED, 'JSON report filename');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -38,6 +40,7 @@ class Run extends Command
         $this->container['filesystem.path'] = $input->getArgument('src');
 
         $analyzer = $this->container['analyzer'];
+        $analyzer->setOutput($output);
         $analyzer->run();
     }
 
@@ -45,8 +48,13 @@ class Run extends Command
     {
         $dispatcher = $this->container['dispatcher'];
 
-        $this->enableConsoleOutput($dispatcher, $output);
+        if(! $input->getOption('no-output'))
+        {
+            $this->enableConsoleOutput($dispatcher, $output);
+        }
+
         $this->enableHtmlReport($dispatcher, $input->getOption('htmlReport'));
+        $this->enableJsonReport($dispatcher, $input->getOption('jsonReport'));
     }
 
     private function enableConsoleOutput(EventDispatcherInterface $dispatcher, OutputInterface $output)
@@ -64,6 +72,17 @@ class Run extends Command
             $html->setReportFilename($htmlReportFilename);
 
             $dispatcher->addSubscriber($html);
+        }
+    }
+
+    private function enableJsonReport(EventDispatcherInterface $dispatcher, $jsonReportFilename)
+    {
+        if($jsonReportFilename !== null)
+        {
+            $json = $this->container['subscriber.json'];
+            $json->setReportFilename($jsonReportFilename);
+
+            $dispatcher->addSubscriber($json);
         }
     }
 }

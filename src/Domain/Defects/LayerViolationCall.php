@@ -38,4 +38,15 @@ final class LayerViolationCall extends Defect
             $this->dependency->relativeName()
         );
     }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'type' => 'layer_violation',
+            'bc' => (string) $this->dependency->boundedContext(),
+            'from' => (string) $this->layerFrom,
+            'to' => (string) $this->dependency->layer(),
+            'callee' => (string) $this->dependency->relativeName()
+        ];
+    }
 }

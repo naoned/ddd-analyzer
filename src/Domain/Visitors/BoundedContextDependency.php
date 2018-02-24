@@ -8,7 +8,7 @@ use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_;
 use Niktux\DDD\Analyzer\Domain\ContextualVisitor;
 use PhpParser\Node\Name;
-use Niktux\DDD\Analyzer\Domain\Defects\BoundedContextCouplage;
+use Niktux\DDD\Analyzer\Domain\Defects\BoundedContextCoupling;
 use Niktux\DDD\Analyzer\Domain\Defects\LayerViolationCall;
 use Niktux\DDD\Analyzer\Domain\NamespaceInterpreter;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
@@ -84,7 +84,7 @@ class BoundedContextDependency extends ContextualVisitor
         {
             if(! in_array($targetBc->value(), $this->bcWhitelist))
             {
-                $this->dispatch(new BoundedContextCouplage($node, $namespace->boundedContext(), $dependency));
+                $this->dispatch(new BoundedContextCoupling($node, $namespace->boundedContext(), $dependency));
             }
         }
 

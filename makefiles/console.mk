@@ -2,6 +2,8 @@
 # Onyx Console
 #------------------------------------------------------------------------------
 
+-include .env
+
 CONSOLE_IMAGE_NAME=ddd/analyzer
 CONTAINER_SOURCE_PATH=/usr/src/ddd
 ANALYZED_SOURCE_PATH=${HOST_SOURCE_PATH}/${ANALYZED_RELATIVE_SOURCE_PATH}
@@ -31,8 +33,11 @@ create-console-image: docker/images/console/Dockerfile
 console: create-console-image ## Run console command
 	$(call console, ${CLI_ARGS})
 
-console-analyze: create-console-image ## Run console command
+analyze-html: create-console-image ## Run console command
 	$(call console, -vvv analyze --htmlReport report.html ${CONTAINER_VAR_SRC}/src)
+
+analyze-json: create-console-image ## Run console command
+	$(call console, -vvv analyze --no-output --jsonReport report.json ${CONTAINER_VAR_SRC}/src)
 
 #------------------------------------------------------------------------------
 

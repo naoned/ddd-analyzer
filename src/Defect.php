@@ -8,7 +8,7 @@ use PhpParser\Node;
 use Niktux\DDD\Analyzer\Domain\ObjectDefinition;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 
-abstract class Defect extends Event
+abstract class Defect extends Event implements \JsonSerializable
 {
     const
         EVENT_NAME = 'defect';

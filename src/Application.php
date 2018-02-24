@@ -26,10 +26,6 @@ class Application extends \Onyx\Application
             // insert your loggers here
         ]));
         $this->register(new Providers\Twig());
-        $this->register(new Providers\Webpack());
-
-        // Uncomment this line if you're using a RDBMS
-        // $this->register(new Providers\DBAL());
     }
 
     protected function initializeServices(): void
@@ -125,6 +121,10 @@ class Application extends \Onyx\Application
         $this['subscriber.html'] = function($c) {
             return new EventSubscribers\HTML($c['reporter.html'], $c['defect.sorter']);
         };
+
+        $this['subscriber.json'] = function($c) {
+            return new EventSubscribers\Json($c['defect.sorter']);
+        };
     }
 
     private function configureTwig(): void
@@ -136,6 +136,5 @@ class Application extends \Onyx\Application
 
     protected function mountControllerProviders(): void
     {
-        $this->mount('/', new Controllers\Home\Provider());
     }
 }

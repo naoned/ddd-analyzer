@@ -13,14 +13,21 @@ final class AnonymousClass extends Defect
         return "Anonymous class";
     }
 
-    public function getMessage(): string
+    private function extends() : ?string
     {
-        $extends = '';
+        $extends = null;
 
         if($this->node->extends !== null)
         {
             $extends = $this->node->extends->getLast();
         }
+
+        return $extends;
+    }
+
+    public function getMessage(): string
+    {
+        $extends = $this->extends();
 
         // TODO implements
 
@@ -28,5 +35,13 @@ final class AnonymousClass extends Defect
             "<type>Anonymous class detected</type>%s",
             $extends ? " <-- <id>$extends</id>" : ""
         );
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'type' => 'anonymous_class',
+            'extends' => $this->extends(),
+        ];
     }
 }

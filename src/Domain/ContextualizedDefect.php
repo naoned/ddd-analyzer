@@ -6,7 +6,7 @@ namespace Niktux\DDD\Analyzer\Domain;
 
 use Niktux\DDD\Analyzer\Defect;
 
-class ContextualizedDefect
+class ContextualizedDefect implements \JsonSerializable
 {
     private
         $defect,
@@ -26,5 +26,13 @@ class ContextualizedDefect
     public function getFile(): string
     {
         return $this->file;
+    }
+
+    public function jsonSerialize(): array
+    {
+        return $this->defect->jsonSerialize() + [
+            'file' => $this->file,
+            'line' => $this->defect->getLine(),
+        ];
     }
 }

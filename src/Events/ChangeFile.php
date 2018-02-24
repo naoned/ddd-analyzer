@@ -14,12 +14,12 @@ class ChangeFile extends Event
     private
         $currentFile;
 
-    public function __construct($currentFile)
+    public function __construct(string $currentFile)
     {
         $this->currentFile = $currentFile;
     }
 
-    public function getCurrentFile()
+    public function getCurrentFile(): string
     {
         return $this->currentFile;
     }

@@ -9,7 +9,7 @@ use PhpParser\Node\Stmt\Use_;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\BoundedContext;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\InterpretedFQN;
 
-final class BoundedContextCouplage extends Defect
+final class BoundedContextCoupling extends Defect
 {
     private
         $dependency,
@@ -25,7 +25,7 @@ final class BoundedContextCouplage extends Defect
 
     public function getName(): string
     {
-        return "Bounded contexts couplage";
+        return "Bounded contexts coupling";
     }
 
     public function getMessage(): string
@@ -36,5 +36,15 @@ final class BoundedContextCouplage extends Defect
             $this->dependency->boundedContext(),
             $this->dependency->layer()->value() . '\\' . $this->dependency->relativeName()
         );
+    }
+
+    public function jsonSerialize(): array
+    {
+        return [
+            'type' => 'bc_coupling',
+            'from' => (string)  $this->bcFrom,
+            'to' => (string) $this->dependency->boundedContext(),
+            'dependency' => $this->dependency->layer()->value() . '\\' . $this->dependency->relativeName()
+        ];
     }
 }
