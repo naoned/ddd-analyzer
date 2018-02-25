@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace Niktux\DDD\Analyzer;
 
-
-use Niktux\DDD\Analyzer\Domain\SortedDefectCollection;
+use Niktux\DDD\Analyzer\Domain\Collections\SortedDefectCollection;
 
 interface Reporter
 {

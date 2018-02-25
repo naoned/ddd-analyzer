@@ -2,11 +2,12 @@
 
 declare(strict_types = 1);
 
-namespace Niktux\DDD\Analyzer;
+namespace Niktux\DDD\Analyzer\Events;
 
 use PhpParser\Node;
 use Niktux\DDD\Analyzer\Domain\ObjectDefinition;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
+use Niktux\DDD\Analyzer\Event;
 
 abstract class Defect extends Event implements \JsonSerializable
 {

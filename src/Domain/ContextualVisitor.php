@@ -12,7 +12,7 @@ use PhpParser\Node\Stmt\Namespace_;
 use PhpParser\Node\Stmt\ClassMethod;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\ObjectType;
-use Niktux\DDD\Analyzer\Defect;
+use Niktux\DDD\Analyzer\Events\Defect;
 
 abstract class ContextualVisitor extends AbstractVisitor
 {
@@ -29,7 +29,7 @@ abstract class ContextualVisitor extends AbstractVisitor
         $this->nodeStack = new \SplStack();
     }
 
-    final public function beforeTraverse(array $nodes)
+    final public function beforeTraverse(array $nodes): void
     {
         $this->currentNamespace = null;
         $this->currentObjectType = null;
@@ -38,7 +38,7 @@ abstract class ContextualVisitor extends AbstractVisitor
         $this->before($nodes);
     }
 
-    final public function enterNode(Node $node)
+    final public function enterNode(Node $node): void
     {
         if($node instanceof Namespace_)
         {
@@ -66,7 +66,7 @@ abstract class ContextualVisitor extends AbstractVisitor
         $this->nodeStack->push($node);
     }
 
-    final public function leaveNode(Node $node)
+    final public function leaveNode(Node $node): void
     {
         if($node instanceof Namespace_)
         {
@@ -85,7 +85,7 @@ abstract class ContextualVisitor extends AbstractVisitor
         $this->nodeStack->pop();
     }
 
-    final public function afterTraverse(array $nodes)
+    final public function afterTraverse(array $nodes): void
     {
         $this->after($nodes);
     }
@@ -105,22 +105,22 @@ abstract class ContextualVisitor extends AbstractVisitor
         parent::dispatch($event);
     }
 
-    protected function before(array $nodes)
+    protected function before(array $nodes): void
     {
 
     }
 
-    protected function enter(Node $node)
+    protected function enter(Node $node): void
     {
 
     }
 
-    protected function leave(Node $node)
+    protected function leave(Node $node): void
     {
 
     }
 
-    protected function after(array $nodes)
+    protected function after(array $nodes): void
     {
 
     }

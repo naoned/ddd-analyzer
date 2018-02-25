@@ -7,7 +7,6 @@ namespace Niktux\DDD\Analyzer\Domain;
 use Gaufrette\Filesystem;
 use Gaufrette\File;
 use PhpParser\Parser;
-use PhpParser\NodeTraverser;
 use PhpParser\ParserFactory;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\TraverseMode;
 use Niktux\DDD\Analyzer\Dispatcher;
@@ -20,7 +19,8 @@ use Symfony\Component\Console\Helper\ProgressBar;
 class Analyzer implements VisitableAnalyzer
 {
     private const
-        PROGRESS_BAR_FORMAT = 'very_verbose';
+        PROGRESS_BAR_FORMAT = 'very_verbose',
+        NB_STEPS = 7;
 
     private
         $output,
@@ -37,8 +37,11 @@ class Analyzer implements VisitableAnalyzer
         $this->visitors = [];
 
         $this->nodeTraversers = array(
-            (string) TraverseMode::preAnalyze() => new NodeTraverser(),
-            (string) TraverseMode::analyze() => new NodeTraverser(),
+            (string) TraverseMode::complete() => new ProjectTraverser(),
+            (string) TraverseMode::rawCollect() => new ProjectTraverser(),
+            (string) TraverseMode::infer() => new ProjectTraverser(),
+            (string) TraverseMode::collect() => new ProjectTraverser(),
+            (string) TraverseMode::analyze() => new ProjectTraverser(),
         );
 
         $this->dispatcher = $dispatcher;
@@ -55,7 +58,15 @@ class Analyzer implements VisitableAnalyzer
         $this->skipTests = true;
     }
 
-    public function addVisitor(TraverseMode $mode, Visitor $visitor): self
+    public function addVisitors(TraverseMode $mode, array $visitors): void
+    {
+        foreach($visitors as $visitor)
+        {
+            $this->addVisitor($mode, $visitor);
+        }
+    }
+
+    public function addVisitor(TraverseMode $mode, Visitor $visitor): void
     {
         $mode = $mode->value();
 
@@ -67,24 +78,31 @@ class Analyzer implements VisitableAnalyzer
         $visitor->setDispatcher($this->dispatcher);
         $this->nodeTraversers[$mode]->addVisitor($visitor);
         $this->visitors[] = $visitor;
-
-        return $this;
     }
 
     public function run(): void
     {
         $this->displayTitle('DDD Analyzer');
 
-        $this->displayStep("Parsing files");
+        $this->displayStep("Parse files");
         $nodes = $this->parseFiles();
 
-        $this->displayStep("Pre-analyzing");
-        $this->preAnalyze($nodes);
+        $this->displayStep("Analyze pass #1 [complete AST]");
+        $this->pass(TraverseMode::complete(), $nodes);
 
-        $this->displayStep("Analyzing");
-        $this->analyze($nodes);
+        $this->displayStep("Analyze pass #2 [raw data collection]");
+        $this->pass(TraverseMode::rawCollect(), $nodes);
 
-        $this->displayStep("Creating reports");
+        $this->displayStep("Analyze pass #3 [infer]");
+        $this->pass(TraverseMode::infer(), $nodes);
+
+        $this->displayStep("Analyze pass #4 [inferred data collection]");
+        $this->pass(TraverseMode::collect(), $nodes);
+
+        $this->displayStep("Analyze pass #5 [analyze]");
+        $this->pass(TraverseMode::analyze(), $nodes);
+
+        $this->displayStep("Create reports");
         $this->dispatcher->dispatch(new TraverseEnd());
     }
 
@@ -143,40 +161,32 @@ class Analyzer implements VisitableAnalyzer
         }
     }
 
-    private function preAnalyze(array $nodes): void
+    private function pass(TraverseMode $mode, array $nodes): void
     {
-        $this->traverse($nodes, $this->nodeTraversers[(string) TraverseMode::preAnalyze()]);
+        $this->traverse($nodes, $this->nodeTraversers[(string) $mode]);
     }
 
-    private function analyze(array $nodes): void
-    {
-        $this->traverse($nodes, $this->nodeTraversers[(string) TraverseMode::analyze()]);
-    }
-
-    private function traverse(array $nodes, NodeTraverser $traverser)
+    private function traverse(array $nodes, ProjectTraverser $traverser)
     {
         $bar = $this->startProgressBar(count($nodes));
 
         foreach($nodes as $file => $stmts)
         {
             $bar->setMessage(explode('/',$file)[0], 'file');
+
             $this->dispatcher->dispatch(new ChangeFile($file));
             $traverser->traverse($stmts);
+
             $bar->advance();
         }
+
+        $traverser->endProject();
 
         $this->finishProgressBar($bar);
     }
 
     private function startProgressBar(int $count): ProgressBar
     {
-        /*
-        $bar = new ProgressBar($this->output, $count);
-        $bar->setFormat(self::PROGRESS_BAR_FORMAT);
-        $progress->setRedrawFrequency(10);
-        $bar->start();
-        //*/
-
         $bar = new ProgressBar($this->output, $count);
         $bar->setFormat(" \033[44;37m %file:-37s% \033[0m\n %current%/%max% %bar% %percent:3s%%\n ETA  %remaining:-10s%");
         $bar->setBarCharacter($done = "\033[32m●\033[0m");
@@ -207,7 +217,7 @@ class Analyzer implements VisitableAnalyzer
     private function displayStep(string $description): void
     {
         static $count = 0;
-        $nbSteps = 4;
+        $nbSteps = self::NB_STEPS;
 
         $this->output->writeln([
             '',

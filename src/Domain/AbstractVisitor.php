@@ -6,7 +6,7 @@ namespace Niktux\DDD\Analyzer\Domain;
 
 use Niktux\DDD\Analyzer\Dispatchers\NullDispatcher;
 use Niktux\DDD\Analyzer\Dispatcher;
-use Niktux\DDD\Analyzer\Defect;
+use Niktux\DDD\Analyzer\Events\Defect;
 use PhpParser\NodeVisitorAbstract;
 
 abstract class AbstractVisitor extends NodeVisitorAbstract implements Visitor
@@ -29,5 +29,9 @@ abstract class AbstractVisitor extends NodeVisitorAbstract implements Visitor
     protected function dispatch(Defect $event): void
     {
         $this->dispatcher->dispatch($event);
+    }
+
+    public function endProject(): void
+    {
     }
 }

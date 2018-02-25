@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Niktux\DDD\Analyzer\Domain;
+namespace Niktux\DDD\Analyzer\Domain\Services;
 
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\InterpretedFQN;

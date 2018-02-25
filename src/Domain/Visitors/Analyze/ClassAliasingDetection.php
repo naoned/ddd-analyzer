@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Niktux\DDD\Analyzer\Domain\Visitors;
+namespace Niktux\DDD\Analyzer\Domain\Visitors\Analyze;
 
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_;
@@ -22,7 +22,7 @@ class ClassAliasingDetection extends ContextualVisitor
         $this->aliasWhitelist = $configuration->read("whitelist", []);
     }
 
-    public function enter(Node $node)
+    public function enter(Node $node): void
     {
         if($node instanceof Use_)
         {

@@ -10,4 +10,6 @@ use Niktux\DDD\Analyzer\Dispatcher;
 interface Visitor extends NodeVisitor
 {
     public function setDispatcher(Dispatcher $dispatcher);
+
+    public function endProject(): void;
 }

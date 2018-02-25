@@ -6,6 +6,7 @@ namespace Niktux\DDD\Analyzer\Domain\ValueObjects;
 
 use Puzzle\Pieces\ConvertibleToString;
 use Onyx\Domain\ValueObject;
+use PhpParser\Node\Name\FullyQualified;
 
 final class FullyQualifiedName implements ValueObject, ConvertibleToString
 {
@@ -44,5 +45,15 @@ final class FullyQualifiedName implements ValueObject, ConvertibleToString
     public function __toString(): string
     {
         return $this->name;
+    }
+
+    public static function fromPhpParserFQN(FullyQualified $fq): self
+    {
+        return new self($fq->toString());
+    }
+
+    public function concat(string $name): self
+    {
+        return new self($this->name . "\\" . $name);
     }
 }

@@ -7,7 +7,7 @@ namespace Niktux\DDD\Analyzer\EventSubscribers;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
-use Niktux\DDD\Analyzer\Defect;
+use Niktux\DDD\Analyzer\Events\Defect;
 use Niktux\DDD\Analyzer\Events\TraverseEnd;
 use Niktux\DDD\Analyzer\Events\ChangeFile;
 

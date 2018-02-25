@@ -8,5 +8,6 @@ use Niktux\DDD\Analyzer\Domain\ValueObjects\TraverseMode;
 
 interface VisitableAnalyzer
 {
-    public function addVisitor(TraverseMode $mode, Visitor $visitor);
+    public function addVisitor(TraverseMode $mode, Visitor $visitor): void;
+    public function addVisitors(TraverseMode $mode, array $visitors): void;
 }

@@ -2,7 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace Niktux\DDD\Analyzer\Domain;
+namespace Niktux\DDD\Analyzer\Domain\Collections;
+
+use Niktux\DDD\Analyzer\Domain\ContextualizedDefect;
 
 class DefectCollection implements DefectRelatedCollection
 {

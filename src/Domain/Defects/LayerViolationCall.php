@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace Niktux\DDD\Analyzer\Domain\Defects;
 
-use Niktux\DDD\Analyzer\Defect;
 use PhpParser\Node\Stmt\Use_;
+use Niktux\DDD\Analyzer\Events\Defect;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\InterpretedFQN;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\Layer;
 

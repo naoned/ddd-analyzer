@@ -6,8 +6,7 @@ namespace Niktux\DDD\Analyzer\Reporters;
 
 use PhpParser\PrettyPrinter\Standard;
 use Niktux\DDD\Analyzer\Reporter;
-use Niktux\DDD\Analyzer\Domain\DefectCollection;
-use Niktux\DDD\Analyzer\Domain\SortedDefectCollection;
+use Niktux\DDD\Analyzer\Domain\Collections\SortedDefectCollection;
 
 class HTMLReporter implements Reporter
 {
@@ -29,50 +28,11 @@ class HTMLReporter implements Reporter
            'report.twig',
             array(
                 'project' => 'DDD Analyzer',
-                'defects' => $defects, //$this->sortDefectsByNamespace($defects),
+                'defects' => $defects,
                 'printer' => $prettyPrint,
         ));
 
         return $this;
-    }
-
-    private function sortDefectsByNamespace(SortedDefectCollection $sortedCollection): SortedDefectCollection
-    {
-        $result = new SortedDefectCollection();
-
-        foreach($sortedCollection as $bc => $collection)
-        {
-            $defects = iterator_to_array($collection);
-            ksort($defects);
-            $sorted = [];
-
-            foreach($defects as $fileDefects)
-            {
-                $file = $fileDefects->getFile();
-                $namespace = implode('/', explode('/', $file, -1));
-
-                if(! isset($sorted[$namespace]))
-                {
-                    $sorted[$namespace] = array();
-                }
-
-                $sorted[$namespace][$file] = $fileDefects;
-            }
-
-            $newCollection = new DefectCollection();
-
-            foreach($sorted as $array)
-            {
-                foreach($array as $defect)
-                {
-                    $newCollection->add($defect);
-                }
-            }
-
-            $result->add($bc, $newCollection);
-        }
-
-        return $result;
     }
 
     public function save(string $reportFilename): void

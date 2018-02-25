@@ -7,9 +7,9 @@ namespace Niktux\DDD\Analyzer\EventSubscribers;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Niktux\DDD\Analyzer\Events\TraverseEnd;
 use Niktux\DDD\Analyzer\Events\ChangeFile;
-use Niktux\DDD\Analyzer\Defect;
+use Niktux\DDD\Analyzer\Events\Defect;
 use Niktux\DDD\Analyzer\Reporter;
-use Niktux\DDD\Analyzer\Domain\DefectCollection;
+use Niktux\DDD\Analyzer\Domain\Collections\DefectCollection;
 use Niktux\DDD\Analyzer\Domain\ContextualizedDefect;
 use Niktux\DDD\Analyzer\Domain\DefectSorter;
 

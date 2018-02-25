@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Niktux\DDD\Analyzer\Domain\Defects;
 
-use Niktux\DDD\Analyzer\Defect;
+use Niktux\DDD\Analyzer\Events\Defect;
 
 class ClassAliasing extends Defect
 {

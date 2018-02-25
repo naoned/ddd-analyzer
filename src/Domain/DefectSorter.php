@@ -5,9 +5,13 @@ declare(strict_types = 1);
 namespace Niktux\DDD\Analyzer\Domain;
 
 use Niktux\DDD\Analyzer\Domain\ValueObjects\InterpretedFQN;
-use Niktux\DDD\Analyzer\Defect;
+use Niktux\DDD\Analyzer\Events\Defect;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\BoundedContext;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
+use Niktux\DDD\Analyzer\Domain\Collections\DefectRelatedCollection;
+use Niktux\DDD\Analyzer\Domain\Collections\DefectCollection;
+use Niktux\DDD\Analyzer\Domain\Collections\SortedDefectCollection;
+use Niktux\DDD\Analyzer\Domain\Services\NamespaceInterpreter;
 
 class DefectSorter
 {

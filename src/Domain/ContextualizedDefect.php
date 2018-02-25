@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace Niktux\DDD\Analyzer\Domain;
 
-use Niktux\DDD\Analyzer\Defect;
+use Niktux\DDD\Analyzer\Events\Defect;
 
 class ContextualizedDefect implements \JsonSerializable
 {

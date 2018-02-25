@@ -48,6 +48,14 @@ final class InterpretedFQN implements ValueObject, ConvertibleToString
         return $this->fqn->equals($fqn->fqn());
     }
 
+    public function concat(string $name): self
+    {
+        $fqn = $this->fqn->concat($name);
+        $relativeName = $this->relativeName . "\\" . $name;
+
+        return new self($fqn, $this->boundedContext, $this->layer, $relativeName);
+    }
+
     public function __toString(): string
     {
         return sprintf('%s\\%s\\%s', $this->boundedContext, $this->layer, $this->relativeName);

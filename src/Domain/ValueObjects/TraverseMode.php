@@ -14,7 +14,7 @@ final class TraverseMode implements ValueObject, ConvertibleToString
 
     private function __construct(string $value)
     {
-        $allowed = ['preAnalyze', 'analyze'];
+        $allowed = ['complete', 'raw_collect', 'infer', 'collect', 'analyze'];
 
         if(! in_array($value, $allowed))
         {
@@ -24,9 +24,24 @@ final class TraverseMode implements ValueObject, ConvertibleToString
         $this->value = $value;
     }
 
-    public static function preAnalyze(): self
+    public static function complete(): self
     {
-        return new self('preAnalyze');
+        return new self('complete');
+    }
+
+    public static function rawCollect(): self
+    {
+        return new self('raw_collect');
+    }
+
+    public static function infer(): self
+    {
+        return new self('infer');
+    }
+
+    public static function collect(): self
+    {
+        return new self('collect');
     }
 
     public static function analyze(): self

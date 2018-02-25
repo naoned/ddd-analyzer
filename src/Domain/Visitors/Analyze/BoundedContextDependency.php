@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace Niktux\DDD\Analyzer\Domain\Visitors;
+namespace Niktux\DDD\Analyzer\Domain\Visitors\Analyze;
 
 use PhpParser\Node;
 use PhpParser\Node\Stmt\Use_;
@@ -10,7 +10,7 @@ use Niktux\DDD\Analyzer\Domain\ContextualVisitor;
 use PhpParser\Node\Name;
 use Niktux\DDD\Analyzer\Domain\Defects\BoundedContextCoupling;
 use Niktux\DDD\Analyzer\Domain\Defects\LayerViolationCall;
-use Niktux\DDD\Analyzer\Domain\NamespaceInterpreter;
+use Niktux\DDD\Analyzer\Domain\Services\NamespaceInterpreter;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\InterpretedFQN;
 use Puzzle\Configuration;
@@ -34,7 +34,7 @@ class BoundedContextDependency extends ContextualVisitor
         return "BoundedContextDependency";
     }
 
-    public function enter(Node $node)
+    public function enter(Node $node): void
     {
         if($node instanceof Use_)
         {
@@ -64,18 +64,13 @@ class BoundedContextDependency extends ContextualVisitor
             $fqn = $this->interpreter->translate($fqn);
             $bc = $fqn->boundedContext();
 
-            $notBC = ['Console', 'Controllers', 'Domain', 'Persistence', 'Projection', 'Services', 'Workers'];
-
-            if(! in_array($bc->value(), $notBC))
-            {
-                return $fqn;
-            }
+            return $fqn;
         }
 
         return null;
     }
 
-    private function checkRule(Use_ $node, InterpretedFQN $dependency)
+    private function checkRule(Use_ $node, InterpretedFQN $dependency): void
     {
         $namespace = $this->interpreter->translate($this->currentNamespace);
         $targetBc = $dependency->boundedContext();

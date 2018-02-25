@@ -8,14 +8,21 @@ use Silex\Provider\SessionServiceProvider;
 use Onyx\Providers;
 use Gaufrette\Adapter\Local;
 use Gaufrette\Filesystem;
+use Puzzle\PrefixedConfiguration;
 use Niktux\DDD\Analyzer\Domain\Analyzer;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\TraverseMode;
-use Niktux\DDD\Analyzer\Domain\Visitors\ClassAliasingDetection;
-use Niktux\DDD\Analyzer\Domain\Visitors\AnonymousClassDetection;
-use Niktux\DDD\Analyzer\Domain\Visitors\BoundedContextDependency;
-use Niktux\DDD\Analyzer\Domain\NamespaceInterpreter;
 use Niktux\DDD\Analyzer\Domain\DefectSorter;
-use Puzzle\PrefixedConfiguration;
+use Niktux\DDD\Analyzer\Domain\Services\NamespaceInterpreter;
+use Niktux\DDD\Analyzer\Domain\Services\KnowledgeBase;
+use Niktux\DDD\Analyzer\Domain\Visitors\RawCollect\TypeCollector;
+use Niktux\DDD\Analyzer\Domain\Visitors\Infer\TypeInference;
+use Niktux\DDD\Analyzer\Domain\Visitors\Collect\BoundedContextCollector;
+use Niktux\DDD\Analyzer\Domain\Visitors\Collect\CQSCollector;
+use Niktux\DDD\Analyzer\Domain\Visitors\Analyze\ClassAliasingDetection;
+use Niktux\DDD\Analyzer\Domain\Visitors\Analyze\AnonymousClassDetection;
+use Niktux\DDD\Analyzer\Domain\Visitors\Analyze\BoundedContextDependency;
+use PhpParser\NodeVisitor\NameResolver;
+use Niktux\DDD\Analyzer\Domain\Visitors\PhpParserVisitorAdapter;
 
 class Application extends \Onyx\Application
 {
@@ -47,6 +54,10 @@ class Application extends \Onyx\Application
             return new DefectSorter($c['name.interpreter']);
         };
 
+        $this['knowledgeBase'] = function($c) {
+            return new KnowledgeBase();
+        };
+
         $this['analyzer'] = function($c) {
             $config = $c['configuration'];
             $analyzer = new Analyzer($c['event.dispatcher'], $c['filesystem']);
@@ -66,9 +77,38 @@ class Application extends \Onyx\Application
             {
                 if($config->read("analyzer/$visitor/enabled", true))
                 {
-                    $analyzer->addVisitor(TraverseMode::analyze(), $c["visitors.$visitor"]);
+                    $analyzer->addVisitor(TraverseMode::analyze(), $c["visitors.analyze.$visitor"]);
                 }
             }
+
+            $analyzer->addVisitors(
+                TraverseMode::complete(),
+                [
+                    $c["visitors.complete.nameResolver"],
+                ]
+            );
+
+            $analyzer->addVisitors(
+                TraverseMode::rawCollect(),
+                [
+                    $c["visitors.rawCollect.typeCollector"],
+                ]
+            );
+
+            $analyzer->addVisitors(
+                TraverseMode::infer(),
+                [
+                    $c["visitors.infer.typeInference"],
+                ]
+            );
+
+            $analyzer->addVisitors(
+                TraverseMode::collect(),
+                [
+                    $c["visitors.collect.BoundedContextCollector"],
+                    $c["visitors.collect.CQSCollector"],
+                ]
+            );
 
             return $analyzer;
         };
@@ -76,27 +116,68 @@ class Application extends \Onyx\Application
         $this->initializeVisitors();
     }
 
-    private function initializeVisitors()
+    private function initializeVisitors(): void
     {
-        $this['visitors.BoundedContextDependency'] = function($c) {
+        $this->initializeCompleteVisitors();
+        $this->initializeRawCollectVisitors();
+        $this->initializeInferVisitors();
+        $this->initializeCollectVisitors();
+        $this->initializeAnalyzeVisitors();
+    }
+
+    private function initializeCompleteVisitors(): void
+    {
+        $this['visitors.complete.nameResolver'] = function($c) {
+            return new PhpParserVisitorAdapter(new NameResolver());
+        };
+    }
+
+    private function initializeRawCollectVisitors(): void
+    {
+        $this['visitors.rawCollect.typeCollector'] = function($c) {
+            return new TypeCollector($c['knowledgeBase']);
+        };
+    }
+
+    private function initializeCollectVisitors(): void
+    {
+        $this['visitors.collect.BoundedContextCollector'] = function($c) {
+            return new BoundedContextCollector($c['knowledgeBase'], $c['name.interpreter']);
+        };
+
+        $this['visitors.collect.CQSCollector'] = function($c) {
+            return new CQSCollector($c['knowledgeBase'], $c['name.interpreter']);
+        };
+    }
+
+    private function initializeInferVisitors(): void
+    {
+        $this['visitors.infer.typeInference'] = function($c) {
+            return new TypeInference($c['knowledgeBase']);
+        };
+    }
+
+    private function initializeAnalyzeVisitors(): void
+    {
+        $this['visitors.analyze.BoundedContextDependency'] = function($c) {
             return new BoundedContextDependency(
                 $c['name.interpreter'],
                 new PrefixedConfiguration($c['configuration'], "analyzer/BoundedContextDependency")
             );
         };
 
-        $this['visitors.AnonymousClassDetection'] = function($c) {
+        $this['visitors.analyze.AnonymousClassDetection'] = function($c) {
             return new AnonymousClassDetection();
         };
 
-        $this['visitors.ClassAliasingDetection'] = function($c) {
+        $this['visitors.analyze.ClassAliasingDetection'] = function($c) {
             return new ClassAliasingDetection(
                 new PrefixedConfiguration($c['configuration'], "analyzer/ClassAliasingDetection")
             );
         };
     }
 
-    private function initializeFilesystem()
+    private function initializeFilesystem(): void
     {
         $this['filesystem.path'] = 'src/';
         $this['filesystem.adapter'] = function($c) {
@@ -108,7 +189,7 @@ class Application extends \Onyx\Application
         };
     }
 
-    private function initializeSubscribers()
+    private function initializeSubscribers(): void
     {
         $this['subscriber.console'] = function($c) {
             return new EventSubscribers\Console();
@@ -123,7 +204,7 @@ class Application extends \Onyx\Application
         };
 
         $this['subscriber.json'] = function($c) {
-            return new EventSubscribers\Json($c['defect.sorter']);
+            return new EventSubscribers\Json($c['knowledgeBase']);
         };
     }
 

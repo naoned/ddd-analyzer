@@ -7,10 +7,11 @@ namespace Niktux\DDD\Analyzer\EventSubscribers;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Niktux\DDD\Analyzer\Events\TraverseEnd;
 use Niktux\DDD\Analyzer\Events\ChangeFile;
-use Niktux\DDD\Analyzer\Defect;
-use Niktux\DDD\Analyzer\Domain\DefectCollection;
+use Niktux\DDD\Analyzer\Events\Defect;
+use Niktux\DDD\Analyzer\Domain\Collections\DefectCollection;
 use Niktux\DDD\Analyzer\Domain\ContextualizedDefect;
-use Niktux\DDD\Analyzer\Domain\DefectSorter;
+use Niktux\DDD\Analyzer\Domain\Services\KnowledgeBase;
+use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 
 class Json implements EventSubscriberInterface
 {
@@ -18,14 +19,15 @@ class Json implements EventSubscriberInterface
         DEFAULT_REPORT_FILENAME = 'report.json';
 
     private
-        $sorter,
+        $base,
         $defects,
         $reportFilename,
         $currentFile;
 
-    public function __construct(DefectSorter $sorter)
+    public function __construct(KnowledgeBase $base)
     {
-        $this->sorter = $sorter;
+        $this->base = $base;
+
         $this->defects = new DefectCollection();
         $this->reportFilename = self::DEFAULT_REPORT_FILENAME;
         $this->currentFile = null;
@@ -56,31 +58,61 @@ class Json implements EventSubscriberInterface
 
     public function onDefect(Defect $event)
     {
-        $event->formattedMessage = $this->formatMessage($event->getMessage());
-
-        $defect = new ContextualizedDefect($event, $this->currentFile);
-
-        $this->defects->add($defect);
-    }
-
-    private function formatMessage($message)
-    {
-        return strtr($message, array(
-            'id>' => 'strong>',
-            'type>' => 'strong>',
-            'bc>' => 'strong>',
-        ));
+        $this->defects->add(
+            new ContextualizedDefect($event, $this->currentFile)
+        );
     }
 
     public function postMortemReport(TraverseEnd $event)
     {
-        $data = [];
+        $data = [
+            'bounded_contexts' => [],
+            'types' => [],
+            'queries' => [],
+            'commands' => [],
+            'defects' => [],
+        ];
+
+        foreach($this->base->boundedContexts() as $bc)
+        {
+            $data['bounded_contexts'][] = (string) $bc;
+        }
+
+        $serviceProvider = $this->base->types()->get(new FullyQualifiedName("Pimple\\ServiceProviderInterface"));
+        foreach($this->base->types() as $type)
+        {
+            if($type->isA($serviceProvider) === false)
+            {
+                $data['types'][] = $type->jsonSerialize();
+            }
+        }
+
+        foreach($this->base->queries() as $query)
+        {
+            $data['queries'][] = $query->jsonSerialize();
+        }
+
+        foreach($this->base->commands() as $command)
+        {
+            $data['commands'][] = $command->jsonSerialize();
+        }
 
         foreach($this->defects as $defect)
         {
-            $data[] = $defect->jsonSerialize();
+            $data['defects'][] = $defect->jsonSerialize();
         }
 
-        file_put_contents($this->reportFilename, json_encode(['defects' => $data]));
+        $summary = [
+            'report_time' => date(DATE_ISO8601),
+        ];
+
+        foreach($data as $key => $values)
+        {
+            $summary[$key] = count($values);
+        }
+
+        $data = ['summary' => $summary] + $data;
+
+        file_put_contents($this->reportFilename, json_encode($data));
     }
 }
