@@ -79,6 +79,7 @@ class NamespaceInterpreterTest extends TestCase
         return [
             ['A'],
             ['A\\B'],
+            ['A\\B\\Domain\\X\\Y'],
             ['A\\B\\BC'],
             ['A\\B\\BC\\domain'],
             ['A\\B\\BC\\Persistence\\X'],

@@ -86,10 +86,6 @@ class TypeInference extends ContextualVisitor
         return $type;
     }
 
-    protected function after(array $nodes): void
-    {
-    }
-
     public function endProject(): void
     {
         foreach($this->types as $type)
@@ -123,7 +119,7 @@ class TypeInference extends ContextualVisitor
         // Vital optimization
         if($type->resolved === true)
         {
-            return [$type] + $type->others();
+            return $type->others();
         }
 
         $result = [];
@@ -139,6 +135,6 @@ class TypeInference extends ContextualVisitor
         }
         $type->resolved = true;
 
-        return [$type] + $result;
+        return $result;
     }
 }

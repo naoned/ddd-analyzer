@@ -66,6 +66,11 @@ abstract class ContextualVisitor extends AbstractVisitor
         $this->nodeStack->push($node);
     }
 
+    protected function inNamespace(): bool
+    {
+        return $this->currentNamespace !== null &&  empty((string) $this->currentNamespace) === false;
+    }
+
     final public function leaveNode(Node $node): void
     {
         if($node instanceof Namespace_)
@@ -107,21 +112,17 @@ abstract class ContextualVisitor extends AbstractVisitor
 
     protected function before(array $nodes): void
     {
-
     }
 
     protected function enter(Node $node): void
     {
-
     }
 
     protected function leave(Node $node): void
     {
-
     }
 
     protected function after(array $nodes): void
     {
-
     }
 }

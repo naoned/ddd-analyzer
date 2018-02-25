@@ -35,6 +35,11 @@ class Type implements ConvertibleToString, \JsonSerializable
 
     public function isA(Type $target): bool
     {
+        if($target->equals($this))
+        {
+            return true;
+        }
+
         foreach($this->others as $type)
         {
             if($type->equals($target))
@@ -67,12 +72,7 @@ class Type implements ConvertibleToString, \JsonSerializable
 
         foreach($this->others as $other)
         {
-            $fqn = $other->fqn();
-
-            if(! $fqn->equals($this->fqn))
-            {
-                $others[] = (string) $other->fqn();
-            }
+            $others[] = (string) $other->fqn();
         }
 
         return [
