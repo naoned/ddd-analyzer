@@ -7,7 +7,6 @@ namespace Niktux\DDD\Analyzer\Domain\ValueObjects\CQS;
 use Puzzle\Pieces\ConvertibleToString;
 use Onyx\Domain\ValueObject;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\InterpretedFQN;
-use Niktux\DDD\Analyzer\Domain\ValueObjects\Layer;
 
 abstract class AbstractCQSItem implements ValueObject, ConvertibleToString, \JsonSerializable
 {
@@ -16,37 +15,7 @@ abstract class AbstractCQSItem implements ValueObject, ConvertibleToString, \Jso
 
     public function __construct(InterpretedFQN $fqn)
     {
-        if(static::isValid($fqn) === false)
-        {
-            throw new \LogicException("Wrong " . __CLASS__ . " : " . $fqn);
-        }
-
         $this->fqn = $fqn;
-    }
-
-    abstract public static function isValid(InterpretedFQN $fqn): bool;
-
-    protected static function isQueryOrCommand(InterpretedFQN $fqn, string $rootSubNamespace, string $classSuffix): bool
-    {
-        if(! $fqn->layer()->equals(Layer::application()))
-        {
-            return false;
-        }
-
-        $parts = explode('\\', $fqn->relativeName());
-        if($parts[0] !== $rootSubNamespace)
-        {
-            return false;
-        }
-
-        $classname = array_pop($parts);
-
-        if(substr($classname, strlen($classSuffix) * -1) !== $classSuffix)
-        {
-            return false;
-        }
-
-        return true;
     }
 
     public function name(): string

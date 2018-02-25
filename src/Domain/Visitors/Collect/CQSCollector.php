@@ -16,23 +16,36 @@ class CQSCollector extends ContextualVisitor
 {
     private
         $interpreter,
-        $queries,
-        $commands;
+        $base,
+        $queryInterface,
+        $commandInterface;
 
-    public function __construct(KnowledgeBase $base, NamespaceInterpreter $interpreter)
+    public function __construct(KnowledgeBase $base, NamespaceInterpreter $interpreter, string $queryInterface, string $commandInterface)
     {
         parent::__construct();
 
         $this->interpreter = $interpreter;
-        $this->queries = $base->queries();
-        $this->commands = $base->commands();
+        $this->base = $base;
+
+        $this->queryInterface = $queryInterface;
+        $this->commandInterface = $commandInterface;
+    }
+
+    public function startProject(): void
+    {
+        $this->queryInterface = $this->base->loadType($this->queryInterface);
+        $this->commandInterface = $this->base->loadType($this->commandInterface);
     }
 
     protected function enter(Node $node): void
     {
         if($node instanceof Class_)
         {
-            if($this->currentNamespace === null || $this->interpreter->canTranslate($this->currentNamespace) === false || $node->name === null)
+            if($this->currentNamespace === null
+            || $this->interpreter->canTranslate($this->currentNamespace) === false
+            || $node->name === null
+            || $node->isAbstract()
+            )
             {
                 return;
             }
@@ -40,15 +53,18 @@ class CQSCollector extends ContextualVisitor
             $fqn = $this->interpreter->translate($this->currentNamespace);
             $fqn = $fqn->concat($node->name);
 
-            if(Query::isValid($fqn))
+            $type = $this->base->types()->get($fqn->fqn());
+
+            if($type->isA($this->queryInterface))
             {
-                $this->queries->add(
+                $this->base->queries()->add(
                     new Query($fqn)
                 );
             }
-            elseif(Command::isValid($fqn))
+
+            if($type->isA($this->commandInterface))
             {
-                $this->commands->add(
+                $this->base->commands()->add(
                     new Command($fqn)
                 );
             }

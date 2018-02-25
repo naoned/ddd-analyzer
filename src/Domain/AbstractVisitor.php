@@ -31,6 +31,10 @@ abstract class AbstractVisitor extends NodeVisitorAbstract implements Visitor
         $this->dispatcher->dispatch($event);
     }
 
+    public function startProject(): void
+    {
+    }
+
     public function endProject(): void
     {
     }

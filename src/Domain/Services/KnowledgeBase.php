@@ -8,6 +8,8 @@ use Niktux\DDD\Analyzer\Domain\Collections\BoundedContextCollection;
 use Niktux\DDD\Analyzer\Domain\Collections\CQS\QueryCollection;
 use Niktux\DDD\Analyzer\Domain\Collections\CQS\CommandCollection;
 use Niktux\DDD\Analyzer\Domain\Collections\TypeCollection;
+use Niktux\DDD\Analyzer\Domain\Type;
+use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 
 class KnowledgeBase
 {
@@ -43,5 +45,12 @@ class KnowledgeBase
     public function commands(): CommandCollection
     {
         return $this->commands;
+    }
+
+    public function loadType(string $fqnAsString): ?Type
+    {
+        return $this->types->get(
+            new FullyQualifiedName($fqnAsString)
+        );
     }
 }

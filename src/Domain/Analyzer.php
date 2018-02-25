@@ -170,6 +170,8 @@ class Analyzer implements VisitableAnalyzer
     {
         $bar = $this->startProgressBar(count($nodes));
 
+        $traverser->startProject();
+
         foreach($nodes as $file => $stmts)
         {
             $bar->setMessage(explode('/',$file)[0], 'file');

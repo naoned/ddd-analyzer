@@ -1,4 +1,8 @@
 skipTests: true
+CQSCollector:
+  interfaces:
+    query: "Onyx\\Services\\CQS\\Query"
+    command: "Onyx\\Services\\CQS\\Command"
 BoundedContextDependency:
   couplage:
     whitelist:

@@ -11,5 +11,6 @@ interface Visitor extends NodeVisitor
 {
     public function setDispatcher(Dispatcher $dispatcher);
 
+    public function startProject(): void;
     public function endProject(): void;
 }

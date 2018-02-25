@@ -146,7 +146,14 @@ class Application extends \Onyx\Application
         };
 
         $this['visitors.collect.CQSCollector'] = function($c) {
-            return new CQSCollector($c['knowledgeBase'], $c['name.interpreter']);
+            $config = new PrefixedConfiguration($c['configuration'], "analyzer/CQSCollector");
+
+            return new CQSCollector(
+                $c['knowledgeBase'],
+                $c['name.interpreter'],
+                $config->readRequired('interfaces/query'),
+                $config->readRequired('interfaces/command')
+            );
         };
     }
 
