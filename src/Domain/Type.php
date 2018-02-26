@@ -6,21 +6,29 @@ namespace Niktux\DDD\Analyzer\Domain;
 
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 use Puzzle\Pieces\ConvertibleToString;
+use Niktux\DDD\Analyzer\Domain\ValueObjects\ObjectType;
 
 class Type implements ConvertibleToString, \JsonSerializable
 {
     private
+        $objectType,
         $fqn,
         $others;
 
     public
         $resolved;
 
-    public function __construct(FullyQualifiedName $fqn)
+    public function __construct(FullyQualifiedName $fqn, ?ObjectType $type = null)
     {
+        $this->objectType = $type;
         $this->fqn = $fqn;
         $this->others = [];
         $this->resolved = false;
+    }
+
+    public function objectType(): ?ObjectType
+    {
+        return $this->objectType;
     }
 
     public function fqn(): FullyQualifiedName
@@ -75,9 +83,17 @@ class Type implements ConvertibleToString, \JsonSerializable
             $others[] = (string) $other->fqn();
         }
 
-        return [
+        $json = [
             'name' => (string) $this->fqn,
-            'instanceof' => $others,
         ];
+
+        if($this->objectType !== null)
+        {
+            $json['type'] = (string) $this->objectType;
+        }
+
+        $json['instanceof'] = $others;
+
+        return $json;
     }
 }

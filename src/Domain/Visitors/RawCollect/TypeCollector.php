@@ -7,9 +7,9 @@ namespace Niktux\DDD\Analyzer\Domain\Visitors\RawCollect;
 use PhpParser\Node;
 use Niktux\DDD\Analyzer\Domain\Services\KnowledgeBase;
 use Niktux\DDD\Analyzer\Domain\ContextualVisitor;
-use PhpParser\Node\Stmt\Class_;
-use PhpParser\Node\Stmt\Interface_;
 use Niktux\DDD\Analyzer\Domain\Type;
+use PhpParser\Node\Stmt\ClassLike;
+use Niktux\DDD\Analyzer\Domain\ValueObjects\ObjectType;
 
 class TypeCollector extends ContextualVisitor
 {
@@ -25,7 +25,7 @@ class TypeCollector extends ContextualVisitor
 
     protected function enter(Node $node): void
     {
-        if($node instanceof Class_ || $node instanceof Interface_)
+        if($node instanceof ClassLike)
         {
             if($node->name === null)
             {
@@ -36,7 +36,7 @@ class TypeCollector extends ContextualVisitor
 
             if(! $this->types->has($fqn))
             {
-                $type = new Type($fqn);
+                $type = new Type($fqn, ObjectType::fromNode($node));
                 $this->types->add($type);
             }
         }

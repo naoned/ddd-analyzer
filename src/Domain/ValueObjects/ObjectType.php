@@ -6,6 +6,10 @@ namespace Niktux\DDD\Analyzer\Domain\ValueObjects;
 
 use Puzzle\Pieces\ConvertibleToString;
 use Onyx\Domain\ValueObject;
+use PhpParser\Node\Stmt\ClassLike;
+use PhpParser\Node\Stmt\Class_;
+use PhpParser\Node\Stmt\Interface_;
+use PhpParser\Node\Stmt\Trait_;
 
 final class ObjectType implements ValueObject, ConvertibleToString
 {
@@ -52,5 +56,23 @@ final class ObjectType implements ValueObject, ConvertibleToString
     public function __toString(): string
     {
         return $this->value;
+    }
+
+    public static function fromNode(ClassLike $node): self
+    {
+        if($node instanceof Class_)
+        {
+            return self::class();
+        }
+        if($node instanceof Interface_)
+        {
+            return self::interface();
+        }
+        if($node instanceof Trait_)
+        {
+            return self::trait();
+        }
+
+        throw new \RuntimeException("Undefined object type : " . get_class($node));
     }
 }
