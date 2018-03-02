@@ -4,11 +4,23 @@ CQSCollector:
     query: "Onyx\\Services\\CQS\\Query"
     command: "Onyx\\Services\\CQS\\Command"
 BoundedContextDependency:
+  enabled: true
   couplage:
     whitelist:
       - Core
 AnonymousClassDetection:
   enabled: true
 ClassAliasingDetection:
+  enabled: true
   whitelist:
     - DTO
+ReturnType:
+  enabled: true
+  whitelists:
+    methods:
+      - __construct
+      - process
+    types:
+      - "Symfony\\Component\\Security\\Core\\User\\UserInterface"
+      - "Pimple\\ServiceProviderInterface"
+      - "Silex\\Application\\ControllerProviderInterface"

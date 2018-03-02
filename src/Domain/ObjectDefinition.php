@@ -7,6 +7,9 @@ namespace Niktux\DDD\Analyzer\Domain;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\ObjectType;
 use Niktux\DDD\Analyzer\Domain\ValueObjects\FullyQualifiedName;
 
+/**
+ * @deprecated
+ */
 final class ObjectDefinition
 {
     private
@@ -38,7 +41,12 @@ final class ObjectDefinition
 
     public function fullname(): string
     {
-        return empty($namespace) ? $name : $namespace->value() . "\\$name";
+        return $this->fqn()->value();
+    }
+
+    public function fqn(): FullyQualifiedName
+    {
+        return $this->namespace->concat($this->name);
     }
 
     public function type(): ObjectType

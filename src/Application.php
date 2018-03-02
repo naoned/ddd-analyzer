@@ -23,6 +23,7 @@ use Niktux\DDD\Analyzer\Domain\Visitors\Analyze\AnonymousClassDetection;
 use Niktux\DDD\Analyzer\Domain\Visitors\Analyze\BoundedContextDependency;
 use PhpParser\NodeVisitor\NameResolver;
 use Niktux\DDD\Analyzer\Domain\Visitors\PhpParserVisitorAdapter;
+use Niktux\DDD\Analyzer\Domain\Visitors\Analyze\ReturnType;
 
 class Application extends \Onyx\Application
 {
@@ -71,6 +72,7 @@ class Application extends \Onyx\Application
                 'BoundedContextDependency',
                 'AnonymousClassDetection',
                 'ClassAliasingDetection',
+                'ReturnType',
             ];
 
             foreach($visitors as $visitor)
@@ -175,6 +177,13 @@ class Application extends \Onyx\Application
 
         $this['visitors.analyze.AnonymousClassDetection'] = function($c) {
             return new AnonymousClassDetection();
+        };
+
+        $this['visitors.analyze.ReturnType'] = function($c) {
+            return new ReturnType(
+                new PrefixedConfiguration($c['configuration'], "analyzer/ReturnType"),
+                $c['knowledgeBase']
+            );
         };
 
         $this['visitors.analyze.ClassAliasingDetection'] = function($c) {

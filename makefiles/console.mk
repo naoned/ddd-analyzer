@@ -35,8 +35,11 @@ create-console-image: docker/images/console/Dockerfile
 console: create-console-image ## Run console command
 	$(call console, ${CLI_ARGS})
 
+analyze: create-console-image ## Launch analyze and Console reporting
+	$(call console, -vvv analyze ${CONTAINER_VAR_SRC}/src)
+
 analyze-html: create-console-image ## Launch analyze and HTML reporting
-	$(call console, -vvv analyze --htmlReport report.html ${CONTAINER_VAR_SRC}/src)
+	$(call console, -vvv analyze --no-output --htmlReport report.html ${CONTAINER_VAR_SRC}/src)
 
 analyze-json: create-console-image ## Launch quiet analyze and JSON reporting
 	$(call console, -vvv analyze --no-output --jsonReport report.json ${CONTAINER_VAR_SRC}/src)
