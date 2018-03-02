@@ -40,7 +40,7 @@ final class MissingReturnType extends Defect
     {
         return [
             'type' => 'missing return type',
-            'type' => $this->type->fullname(),
+            'context' => $this->type->fullname(),
             'method' => $this->method,
         ];
     }
