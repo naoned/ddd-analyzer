@@ -1,14 +1,14 @@
 var path = require('path');
 var webpack = require('webpack');
 var ManifestPlugin = require('webpack-manifest-plugin');
-var publicPath = '/assets/'
+var defaultPublicPath = "/assets/"
 var WebpackMd5Hash = require('webpack-md5-hash');
 var ChunkManifestPlugin = require('chunk-manifest-webpack-plugin');
 
-module.exports = function(debug = false) {
+module.exports = function(debug = false, publicPath = defaultPublicPath) {
     return {
         entry: {
-            main: path.join(__dirname, './assets/')
+            main: path.join(__dirname, 'assets/')
         },
         output: {
             path: path.join(__dirname, 'www/assets'),
