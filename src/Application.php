@@ -235,5 +235,6 @@ class Application extends \Onyx\Application
     protected function mountControllerProviders(): void
     {
         $this->mount('/', new Controllers\Home\Provider());
+        $this->mount('/api/', new Controllers\Api\Provider());
     }
 }

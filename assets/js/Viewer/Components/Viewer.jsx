@@ -7,16 +7,42 @@ export class Viewer extends Component
 {
     static propTypes = {
         options: PropTypes.object.isRequired,
-        report: PropTypes.object.isRequired,
+    }
+
+    state = {
+        graph: {
+            nodes: [],
+            edges: [],
+        }
+    }
+    
+    componentDidMount() {
+        const converter = new GraphConverter()
+        
+        fetch('/api/report')
+        .then((response) => {
+            if(response.status !== 200)
+            {
+                throw response.statusText
+            }
+            
+            return response.json()
+        })
+        .then((report) => {
+            this.setState({
+              graph: converter.convertFromJson(report),
+            })
+        })
+        .catch((error) => {
+            console.error(error);
+        });
     }
     
     render() {
-        const { options, report } = this.props
-        
-        const converter = new GraphConverter()
+        const { options } = this.props
         
         return (
-            <Graph graph={converter.convertFromJson(report)} options={options} />
+            <Graph graph={this.state.graph} options={options} />
         )
     }
 }
