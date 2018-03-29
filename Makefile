@@ -18,6 +18,7 @@ include makefiles/karma.mk
 include makefiles/phpunit.mk
 include makefiles/qa.mk
 include makefiles/whalephant.mk
+include makefiles/webpack.mk
 
 #------------------------------------------------------------------------------
 
