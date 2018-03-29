@@ -7,4 +7,4 @@ ReactDOM.render(
     <Viewer
         options={options}
     />
-, document.getElementById('viewer'))
+, document.getElementById('viewer-wrapper'))

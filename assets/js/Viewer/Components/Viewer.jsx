@@ -11,6 +11,9 @@ export class Viewer extends Component
 
     state = {
         graph: {
+            summary: {
+                reportTime: null,
+            },
             nodes: [],
             edges: [],
         }
@@ -40,9 +43,15 @@ export class Viewer extends Component
     
     render() {
         const { options } = this.props
+        const { reportTime } = this.state.graph.summary
         
         return (
-            <Graph graph={this.state.graph} options={options} />
+            <div className="viewer">
+                <ul className="info">
+                    <li><strong>Report time:</strong> {reportTime !== null ? reportTime.toLocaleString() : '-'}</li>
+                </ul>
+                <Graph graph={this.state.graph} options={options} />
+            </div>
         )
     }
 }

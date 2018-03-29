@@ -9,6 +9,9 @@ export class GraphConverter
         const boundedContexts = this.retrieveBoundedContextNodes(report, couplings)
 
         const data = {
+            summary: {
+                reportTime: new Date(report.summary.report_time),
+            },
             nodes: Object.values(boundedContexts),
             edges: this.buildEdges(couplings, boundedContexts),
         }
