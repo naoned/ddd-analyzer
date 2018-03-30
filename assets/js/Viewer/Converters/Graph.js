@@ -11,6 +11,7 @@ export class GraphConverter
         const data = {
             summary: {
                 reportTime: new Date(report.summary.report_time),
+                hash: report.summary.hash,
             },
             nodes: Object.values(boundedContexts),
             edges: this.buildEdges(couplings, boundedContexts),

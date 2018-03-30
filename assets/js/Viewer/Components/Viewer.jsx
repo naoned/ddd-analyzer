@@ -2,6 +2,7 @@ import React, { Component } from 'react'
 import Graph from 'react-graph-vis'
 import PropTypes from 'prop-types'
 import { GraphConverter } from '../Converters/Graph.js'
+import _ from 'lodash'
 
 export class Viewer extends Component
 {
@@ -43,12 +44,13 @@ export class Viewer extends Component
     
     render() {
         const { options } = this.props
-        const { reportTime } = this.state.graph.summary
+        const { reportTime, hash } = this.state.graph.summary
         
         return (
             <div className="viewer">
                 <ul className="info">
                     <li><strong>Report time:</strong> {reportTime !== null ? reportTime.toLocaleString() : '-'}</li>
+                    <li><strong>Hash:</strong> <span title={hash}>{_.truncate(hash, { length: 8, omission: '' })}</span></li>
                 </ul>
                 <Graph graph={this.state.graph} options={options} />
             </div>

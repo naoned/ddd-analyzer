@@ -10,7 +10,9 @@ class Controller
 {
     use PathManipulation;
 
-    private const REPORT_FILE = 'report.json';
+    private const
+        REPORT_FILE = 'report.json',
+        HASH_FILE = 'commit.hash';
 
     private
         $varPath;
@@ -22,12 +24,14 @@ class Controller
 
     public function reportAction(): JsonResponse
     {
-        $reportFile = $this->computeReportFilePath();
+        $reportFile = $this->computeFilePath(self::REPORT_FILE);
+        $hashFile = $this->computeFilePath(self::HASH_FILE);
 
         try
         {
-            $this->ensureFileExists($reportFile);
+            $this->ensureFilesExist([ $reportFile, $hashFile ]);
             $content = $this->retrieveContent($reportFile);
+            $content['summary']['hash'] = $this->retrieveHash($hashFile);
 
             return $this->response($content, JsonResponse::HTTP_OK);
         }
@@ -51,26 +55,25 @@ class Controller
         }
     }
 
-    private function computeReportFilePath(): string
+    private function computeFilePath(string $fileName): string
     {
-        return $this->enforceEndingSlash($this->varPath) . self::REPORT_FILE;
+        return $this->enforceEndingSlash($this->varPath) . $fileName;
     }
 
-    private function ensureFileExists(string $path): void
+    private function ensureFilesExist(array $paths): void
     {
-        if(!file_exists($path))
+        foreach($paths as $path)
         {
-            throw new NotFoundHttpException("Unable to find file at path $path");
+            if(!file_exists($path))
+            {
+                throw new NotFoundHttpException("Unable to find file at path $path");
+            }
         }
     }
 
     private function retrieveContent(string $path): array
     {
-        $content = file_get_contents($path);
-        if($content === false)
-        {
-            throw new \Exception("Unable to get content of $path file");
-        }
+        $content = $this->retrieveFileContent($path);
 
         $decodedJson = json_decode($content, true);
         if($decodedJson === null)
@@ -79,6 +82,22 @@ class Controller
         }
 
         return $decodedJson;
+    }
+
+    private function retrieveHash(string $path): string
+    {
+        return trim($this->retrieveFileContent($path));
+    }
+
+    private function retrieveFileContent(string $path): string
+    {
+        $content = file_get_contents($path);
+        if($content === false)
+        {
+            throw new \Exception("Unable to get content of $path file");
+        }
+
+        return $content;
     }
 
     private function response(?array $content, int $httpReturnCode): JsonResponse

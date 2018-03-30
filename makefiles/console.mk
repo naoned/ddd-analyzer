@@ -6,7 +6,8 @@
 
 CONSOLE_IMAGE_NAME=ddd/analyzer
 CONTAINER_SOURCE_PATH=/usr/src/ddd
-ANALYZED_SOURCE_PATH=${HOST_SOURCE_PATH}/${ANALYZED_RELATIVE_SOURCE_PATH}
+VAR_PATH=${HOST_SOURCE_PATH}/var
+ANALYZED_SOURCE_PATH=${VAR_PATH}/project
 CONTAINER_VAR_SRC=/var/src
 
 exec = docker run -t -i --rm \
@@ -48,8 +49,9 @@ ${ANALYZED_RELATIVE_SOURCE_PATH}:
 	git clone ${ANALYZED_SOURCE_REPO} ${ANALYZED_RELATIVE_SOURCE_PATH}
 	
 pull-project:
-	cd ${ANALYZED_RELATIVE_SOURCE_PATH} \
-	git pull
+	cd ${ANALYZED_SOURCE_PATH}; \
+	git pull; \
+	git rev-parse HEAD >${VAR_PATH}/commit.hash
 
 #------------------------------------------------------------------------------
 
