@@ -1,6 +1,6 @@
 version: '3'
 services:
-    frontend:
+    analyzer:
         build: images/apache
         image: onyx/ddd-analyzer
         volumes:
@@ -12,3 +12,8 @@ services:
         environment:
             - USER_ID=${USER_ID}
             - GROUP_ID=${GROUP_ID}
+
+networks:
+    naoned:
+        external:
+            name: naoned
