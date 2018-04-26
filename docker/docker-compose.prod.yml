@@ -12,6 +12,8 @@ services:
         environment:
             - USER_ID=${USER_ID}
             - GROUP_ID=${GROUP_ID}
+        networks:
+            - naoned
 
 networks:
     naoned:
