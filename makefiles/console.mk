@@ -50,6 +50,7 @@ ${ANALYZED_SOURCE_PATH}:
 	
 pull-project: ${ANALYZED_SOURCE_PATH}
 	cd ${ANALYZED_SOURCE_PATH}; \
+	git co ${ANALYZED_BRANCH}; \
 	git pull; \
 	git rev-parse HEAD >${VAR_PATH}/commit.hash
 
