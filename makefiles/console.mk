@@ -6,10 +6,11 @@
 
 CONSOLE_IMAGE_NAME=ddd/analyzer
 CONTAINER_SOURCE_PATH=/usr/src/ddd
-ANALYZED_SOURCE_PATH=${HOST_SOURCE_PATH}/${ANALYZED_RELATIVE_SOURCE_PATH}
+VAR_PATH=${HOST_SOURCE_PATH}/var
+ANALYZED_SOURCE_PATH=${VAR_PATH}/project
 CONTAINER_VAR_SRC=/var/src
 
-exec = docker run -t -i --rm \
+exec = $(DOCKER_RUN) --rm \
                 --name "ddd-analyzer-console" \
                 -v ${HOST_SOURCE_PATH}:${CONTAINER_SOURCE_PATH} \
                 -v ${ANALYZED_SOURCE_PATH}:${CONTAINER_VAR_SRC} \
@@ -35,14 +36,23 @@ create-console-image: docker/images/console/Dockerfile
 console: create-console-image ## Run console command
 	$(call console, ${CLI_ARGS})
 
-analyze: create-console-image ## Launch analyze and Console reporting
+analyze: create-console-image pull-project ## Launch analyze and Console reporting
 	$(call console, -vvv analyze ${CONTAINER_VAR_SRC}/src)
 
-analyze-html: create-console-image ## Launch analyze and HTML reporting
+analyze-html: create-console-image pull-project ## Launch analyze and HTML reporting
 	$(call console, -vvv analyze --no-output --htmlReport report.html ${CONTAINER_VAR_SRC}/src)
 
-analyze-json: create-console-image ## Launch quiet analyze and JSON reporting
-	$(call console, -vvv analyze --no-output --jsonReport report.json ${CONTAINER_VAR_SRC}/src)
+analyze-json: create-console-image pull-project ## Launch quiet analyze and JSON reporting
+	$(call console, -vvv analyze --no-output --jsonReport var/report.json ${CONTAINER_VAR_SRC}/src)
+
+${ANALYZED_SOURCE_PATH}:
+	git clone ${ANALYZED_SOURCE_REPO} ${ANALYZED_SOURCE_PATH}
+	
+pull-project: ${ANALYZED_SOURCE_PATH}
+	cd ${ANALYZED_SOURCE_PATH}; \
+	git checkout ${ANALYZED_BRANCH}; \
+	git pull; \
+	git rev-parse HEAD >${VAR_PATH}/commit.hash
 
 #------------------------------------------------------------------------------
 

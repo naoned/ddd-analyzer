@@ -6,18 +6,22 @@ HOST_SOURCE_PATH=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 USER_ID=$(shell id -u)
 GROUP_ID=$(shell id -g)
+ENV_INTERACTIVE?=true
 
 export USER_ID
 export GROUP_ID
 
 #------------------------------------------------------------------------------
 
+include makefiles/executables.mk
 include makefiles/composer.mk
 -include makefiles/console.mk
+include makefiles/docker.mk
 include makefiles/karma.mk
 include makefiles/phpunit.mk
 include makefiles/qa.mk
 include makefiles/whalephant.mk
+include makefiles/webpack.mk
 
 #------------------------------------------------------------------------------
 
@@ -31,7 +35,7 @@ init: var install-dependencies config gitignore .env ## Initialize project
 var:
 	mkdir -m a+w var
 
-install-dependencies: composer-install
+install-dependencies: composer-install npm-install
 
 gitignore:
 	sed '/^composer.lock$$/d' -i .gitignore
