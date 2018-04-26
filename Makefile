@@ -6,12 +6,14 @@ HOST_SOURCE_PATH=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 USER_ID=$(shell id -u)
 GROUP_ID=$(shell id -g)
+ENV_INTERACTIVE?=true
 
 export USER_ID
 export GROUP_ID
 
 #------------------------------------------------------------------------------
 
+include makefiles/executables.mk
 include makefiles/composer.mk
 -include makefiles/console.mk
 include makefiles/docker.mk

@@ -10,7 +10,7 @@ VAR_PATH=${HOST_SOURCE_PATH}/var
 ANALYZED_SOURCE_PATH=${VAR_PATH}/project
 CONTAINER_VAR_SRC=/var/src
 
-exec = docker run -t -i --rm \
+exec = $(DOCKER_RUN) --rm \
                 --name "ddd-analyzer-console" \
                 -v ${HOST_SOURCE_PATH}:${CONTAINER_SOURCE_PATH} \
                 -v ${ANALYZED_SOURCE_PATH}:${CONTAINER_VAR_SRC} \
@@ -50,7 +50,7 @@ ${ANALYZED_SOURCE_PATH}:
 	
 pull-project: ${ANALYZED_SOURCE_PATH}
 	cd ${ANALYZED_SOURCE_PATH}; \
-	git co ${ANALYZED_BRANCH}; \
+	git checkout ${ANALYZED_BRANCH}; \
 	git pull; \
 	git rev-parse HEAD >${VAR_PATH}/commit.hash
 
