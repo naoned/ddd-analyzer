@@ -33,7 +33,7 @@ init: var install-dependencies config gitignore .env ## Initialize project
 var:
 	mkdir -m a+w var
 
-install-dependencies: composer-install
+install-dependencies: composer-install npm-install
 
 gitignore:
 	sed '/^composer.lock$$/d' -i .gitignore
